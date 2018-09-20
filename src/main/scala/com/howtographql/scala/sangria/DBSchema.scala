@@ -11,7 +11,7 @@ import com.howtographql.scala.sangria.models._
 import slick.jdbc.JdbcType
 
 object DBSchema {
-  //and at the begining of the class' body:
+  //and at the beginning of the class' body:
   implicit val dateTimeColumnType: JdbcType[DateTime] = MappedColumnType.base[DateTime, Timestamp](
     dt => new Timestamp(dt.clicks),
     ts => DateTime(ts.getTime)
@@ -60,6 +60,7 @@ object DBSchema {
   val databaseSetup = DBIO.seq(
     Links.schema.create,
     Users.schema.create,
+    Votes.schema.create,
     Links forceInsertAll Seq(
       Link(1, "http://howtographql.com", "Awesome community driven GraphQL tutorial", DateTime(2017,9,12)),
       Link(2, "http://graphql.org", "Official GraphQL web page",DateTime(2017,10,1)),

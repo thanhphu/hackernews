@@ -9,9 +9,11 @@ import com.howtographql.scala.sangria.models.{Link, User, Vote}
 class DAO(db: Database) {
   def allLinks: Future[Seq[models.Link]] = db.run(Links.result)
 
-  def getLinks(ids: Seq[Int]): Future[Seq[Link]] = db.run(
-    Links.filter(_.id inSet ids).result
-  )
+  def getLinks(ids: Seq[Int]): Future[Seq[Link]] = {
+    db.run(
+      Links.filter(_.id inSet ids).result
+    )
+  }
 
   def getUsers(ids: Seq[Int]): Future[Seq[User]] = {
     db.run(

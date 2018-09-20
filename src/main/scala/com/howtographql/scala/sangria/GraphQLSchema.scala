@@ -38,7 +38,6 @@ object GraphQLSchema {
   //////////////////////////////////// USERS
 
   val UserType: ObjectType[Unit, User] = deriveObjectType[Unit, User]()
-
   implicit val userHasId: HasId[User, Int] = HasId[User, Int](_.id)
 
   val usersFetcher = Fetcher(
