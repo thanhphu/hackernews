@@ -1,4 +1,4 @@
-name := "thanh-phu's-hackernews"
+name := "hackernews"
 
 version := "1.0"
 

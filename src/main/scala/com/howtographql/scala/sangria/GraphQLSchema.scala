@@ -1,28 +1,38 @@
 package com.howtographql.scala.sangria
 
+import akka.http.scaladsl.model.DateTime
 import sangria.schema.{Field, ListType, ObjectType}
-import sangria.execution.deferred.{Fetcher, HasId, DeferredResolver}
-import models._
-// #
+import sangria.execution.deferred.{DeferredResolver, Fetcher}
 import sangria.schema._
-import sangria.macros.derive._
+import sangria.macros.derive.{ReplaceField, deriveObjectType}
+import models.Link
+import sangria.ast.StringValue
 
 object GraphQLSchema {
 
   private val linksFetcher = Fetcher(
     (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getLinks(ids)
-  )(HasId(_.id))
+  )
 
   val Resolver: DeferredResolver[MyContext] = DeferredResolver.fetchers(linksFetcher)
 
+  //beginning of the object's body:
+  implicit val GraphQLDateTime: ScalarType[DateTime] = ScalarType[DateTime](//1
+    "DateTime",//2
+    coerceOutput = (dt, _) => dt.toString, //3
+    coerceInput = { //4
+      case StringValue(dt, _, _ ) => DateTime.fromIsoDateTimeString(dt).toRight(DateTimeCoerceViolation)
+      case _ => Left(DateTimeCoerceViolation)
+    },
+    coerceUserInput = { //5
+      case s: String => DateTime.fromIsoDateTimeString(s).toRight(DateTimeCoerceViolation)
+      case _ => Left(DateTimeCoerceViolation)
+    }
+  )
+
   // 1
-  private val LinkType = ObjectType[Unit, Link](
-    "Link",
-    fields[Unit, Link](
-      Field("id", IntType, resolve = _.value.id),
-      Field("url", StringType, resolve = _.value.url),
-      Field("description", StringType, resolve = _.value.description)
-    )
+  private val LinkType = deriveObjectType[Unit, Link](
+    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
   )
 
   val Id = Argument("id", IntType)
@@ -45,6 +55,7 @@ object GraphQLSchema {
       )
     )
   )
+
 
   // 3
   val SchemaDefinition = Schema(QueryType)
